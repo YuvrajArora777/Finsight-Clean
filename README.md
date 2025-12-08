@@ -51,7 +51,6 @@ graph TD
 ### Prerequisites
 *   Python 3.10+
 *   Azure Storage Account (Connection String)
-*   Alpha Vantage API Key
 *   OpenAI API Key
 
 ### 1. Clone & Install
@@ -65,7 +64,6 @@ pip install -r requirements.txt
 Create a `.env` file in the root directory:
 ```ini
 AZURE_CONNECTION_STRING="your_azure_connection_string"
-ALPHAVANTAGE_API_KEY="your_alpha_vantage_key"
 OPENAI_API_KEY="your_openai_key"
 STOCK_TICKERS="AAPL,MSFT,TSLA,GOOGL,AMZN"
 ```
