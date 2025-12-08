@@ -13,3 +13,5 @@ local.settings.json
 
 # OS specific
 .DS_Store
+
+.python_packages
