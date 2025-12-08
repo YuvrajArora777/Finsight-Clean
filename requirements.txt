@@ -1,0 +1,17 @@
+azure-functions
+yfinance
+python-dotenv
+pandas
+numpy
+sentence-transformers
+faiss-cpu
+requests
+openai
+azure-identity
+azure-storage-blob
+fastapi
+uvicorn
+scikit-learn
+tensorflow
+streamlit
+plotly
