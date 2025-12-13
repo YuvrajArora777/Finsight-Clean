@@ -6,3 +6,5 @@ yfinance
 requests
 python-dotenv
 openai
+azure-storage-blob
+azure-identity
