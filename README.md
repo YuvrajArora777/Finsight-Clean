@@ -27,7 +27,7 @@ A modern, interactive frontend built with **Streamlit** and **Plotly**.
 
 ```mermaid
 graph TD
-    API[Alpha Vantage API] -->|Fetch| Function[Azure Function (Python)]
+    API[Alpha Vantage API] -->|Fetch| Function[Azure Function - Python]
     Function -->|Raw CSV| Blob[Azure Blob Storage]
     
     subgraph "ETL & AI Layer"
