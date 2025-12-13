@@ -40,6 +40,7 @@ We evolved the architecture from a simple cloud script to a robust hybrid system
 | **Deployment Blockers** | Azure Policy blocked resource creation in `Central India`, `East US`, etc. | **Strategic Pivot**: Decoupled the frontend. Deployed Dashboard to Streamlit Cloud while keeping the Backend on Azure. |
 | **Git & Secrets** | Active secret file (`local.settings.json`) prevented GitHub Push. | **Git History Rewrite**: Used `git reset` to unstage the file, added it to `.gitignore`, and force-pushed a clean history. |
 | **Latency** | Reading live prices from Azure Blob was too slow (minutes old). | **Real-Time Fetching**: Updated `app.py` to fetch *Price* data directly from Yahoo on page load (ms latency) while loading *AI* data from Azure. |
+| **Serverless Cold Starts** | The large `tensorflow` library caused the Function App to time out during initialization. | **Optimization**: Switched to `tensorflow-cpu` and implemented **Lazy Loading** (imports inside functions) to reduce startup time by 90%. |
 
 ---
 

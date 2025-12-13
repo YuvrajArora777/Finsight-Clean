@@ -6,10 +6,10 @@ FinSight is an end-to-end financial data engineering project that automates the 
 ## 🚀 Features
 
 ### 1. Cloud ETL Pipeline (Azure)
-*   **Source**: Alpha Vantage API (Daily Stock Data).
+*   **Source**: **Yahoo Finance API** (Unlimited Daily Stock Data).
 *   **Orchestration**: Azure Functions (Timer Trigger runs every 6 hours).
 *   **Storage**: Azure Blob Storage (Raw & Processed Data Layers).
-*   **Transformation**: Pandas-based cleaning and feature engineering (Return %, Volatility).
+*   **Tech Stack**: Python V2 Model, `tensorflow-cpu` (Optimized for Serverless).
 
 ### 2. AI & Machine Learning
 *   **Smart Insights (RAG)**: Uses **OpenAI GPT-4o-mini** to read processed data and generate professional financial commentary (e.g., "TSLA showing high volatility...").
@@ -17,8 +17,7 @@ FinSight is an end-to-end financial data engineering project that automates the 
 
 ### 3. Analyst Portal (Dashboard)
 A modern, interactive frontend built with **Streamlit** and **Plotly**.
-*   **Deep Dive Mode**: detailed charts, AI predictions, and a **"Chat with Data"** bot.
-*   **Comparison Mode**: Compare normalized returns of multiple stocks side-by-side.
+*   **Hybrid Data Architecture**: Fetches **Real-Time Prices** directly from Yahoo Finance while pulling **AI Insights** from Azure Blob Storage.
 *   **FinBot**: Context-aware chatbot that answers questions about specific stocks using the live data.
 
 ---
@@ -27,21 +26,23 @@ A modern, interactive frontend built with **Streamlit** and **Plotly**.
 
 ```mermaid
 graph TD
-    API[Alpha Vantage API] -->|Fetch| Function[Azure Function - Python]
-    Function -->|Raw CSV| Blob[Azure Blob Storage]
-    
-    subgraph "ETL & AI Layer"
-    Function -->|Transform| Processed[Processed Data]
+    subgraph "Frontend - Streamlit Cloud"
+    User[User] -->|Interact| Dashboard[Analyst Portal]
+    Dashboard -->|Fetch Live Prices| Yahoo[Yahoo Finance API]
+    end
+
+    subgraph "Backend - Azure Functions"
+    Timer[Timer Trigger (6-hr)] -->|Start| ETL[ETL Pipeline]
+    ETL -->|Fetch History| Yahoo
+    ETL -->|Raw CSV| Blob[Azure Blob Storage]
+    ETL -->|Transform| Processed[Processed Data]
     Processed -->|Context| OpenAI[OpenAI GPT-4o]
     Processed -->|Train| LSTM[LSTM Model]
     OpenAI -->|Insights| Blob
     LSTM -->|Predictions| Blob
     end
 
-    subgraph "Frontend"
-    Blob -->|Read| Dashboard[Streamlit Analyst Portal]
-    Dashboard -->|Interact| User[User]
-    end
+    Blob -->|Read AI Data| Dashboard
 ```
 
 ---
@@ -83,7 +84,7 @@ Visit `http://localhost:8501` in your browser.
 
 ---
 
-## 🔮 Future Roadmap
-*   Deploy Dashboard to Azure App Service / Streamlit Cloud.
+## 🔮 Roadmap
+*   Deploy Dashboard to Streamlit Cloud.
 *   Add Sentiment Analysis on News Headlines.
 *   Expand to Crypto & Forex markets.
