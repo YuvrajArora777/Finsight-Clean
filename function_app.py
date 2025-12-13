@@ -1,7 +1,7 @@
 import datetime
 import logging
 import azure.functions as func
-from etl_pipeline import main as etl_main
+# from etl_pipeline import main as etl_main
 
 app = func.FunctionApp()
 
@@ -14,6 +14,8 @@ def run_etl(mytimer: func.TimerRequest) -> None:
     logging.info(f"FinSight ETL Timer triggered at {utc_timestamp}")
 
     try:
+        # Lazy load the pipeline to prevent Discovery/Import errors
+        from etl_pipeline import main as etl_main
         etl_main.main()
         logging.info("ETL pipeline executed successfully.")
     except Exception as e:
