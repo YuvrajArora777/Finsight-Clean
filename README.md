@@ -32,7 +32,7 @@ graph TD
     end
 
     subgraph "Backend - Azure Functions"
-    Timer[Timer Trigger (6-hr)] -->|Start| ETL[ETL Pipeline]
+    Timer[Timer Trigger "6-hr"] -->|Start| ETL[ETL Pipeline]
     ETL -->|Fetch History| Yahoo
     ETL -->|Raw CSV| Blob[Azure Blob Storage]
     ETL -->|Transform| Processed[Processed Data]
