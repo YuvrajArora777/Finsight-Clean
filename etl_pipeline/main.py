@@ -13,7 +13,7 @@ from . import lstm_predictor
 # Configure logging once at module level
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-ALPHA_VANTAGE_URL = "https://www.alphavantage.co/query"
+
 
 def fetch_stock_data(ticker: str) -> pd.DataFrame:
     """Fetch daily stock data for a given ticker from Yahoo Finance."""

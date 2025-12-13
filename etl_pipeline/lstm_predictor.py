@@ -1,16 +1,11 @@
-import numpy as np
-import pandas as pd
 import logging
-import tensorflow as tf
-from sklearn.preprocessing import MinMaxScaler
-from tensorflow.keras.models import Sequential, load_model
-from tensorflow.keras.layers import LSTM, Dense
+import os
 from io import StringIO
 from azure.storage.blob import BlobServiceClient
-import os
+from sklearn.preprocessing import MinMaxScaler
 
-# Suppress TF warnings
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+# NOTICE: TensorFlow imports removed from top-level to prevent Serverless Cold-Start timeouts.
+# They are now lazy-loaded inside the functions that need them.
 
 def create_dataset(dataset, look_back=60):
     """Convert an array of values into a dataset matrix."""
@@ -23,6 +18,13 @@ def create_dataset(dataset, look_back=60):
 
 def train_and_predict(df: pd.DataFrame, ticker: str):
     """Train a simple LSTM and predict the next day's price."""
+    # Lazy Import TensorFlow here
+    import tensorflow as tf
+    from tensorflow.keras.models import Sequential
+    from tensorflow.keras.layers import LSTM, Dense
+    from tensorflow.keras.callbacks import EarlyStopping
+    import numpy as np
+    
     # Ensure we have enough data
     if len(df) < 100:
         logging.warning(f"Not enough data to train LSTM for {ticker}. Need > 100 rows.")
