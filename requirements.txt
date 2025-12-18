@@ -8,4 +8,5 @@ openai
 azure-identity
 azure-storage-blob
 scikit-learn
-tensorflow-cpu
+tensorflow-cpu==2.15.0
+protobuf==4.21.12
