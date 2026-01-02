@@ -15,3 +15,4 @@ local.settings.json
 .DS_Store
 
 .python_packages
+test_news.py

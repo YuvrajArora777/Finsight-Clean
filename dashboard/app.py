@@ -77,6 +77,21 @@ def load_predictions():
     except:
         return pd.DataFrame()
 
+@st.cache_data(ttl=600)
+def load_sentiment():
+    client = get_blob_service_client()
+    if not client: return pd.DataFrame()
+    
+    try:
+        container = os.getenv("PROCESSED_CONTAINER_NAME", "processeddata")
+        blob_client = client.get_blob_client(container=container, blob="sentiment_analysis.csv")
+        if not blob_client.exists(): return pd.DataFrame()
+        
+        download_stream = blob_client.download_blob()
+        return pd.read_csv(StringIO(download_stream.content_as_text()))
+    except:
+        return pd.DataFrame()
+
 # --- MAIN UI ---
 st.title("📈 FinSight Analyst Portal")
 st.markdown("Real-time Financial Intelligence Dashboard")
@@ -98,6 +113,7 @@ if view_mode == "Deep Dive":
     df = load_data(selected_ticker)
     all_insights = load_insights()
     all_predictions = load_predictions()
+    all_sentiment = load_sentiment()
 
     if df.empty:
         st.warning(f"No data found for {selected_ticker}. Please ensure the ETL pipeline has run.")
@@ -176,7 +192,6 @@ if view_mode == "Deep Dive":
                 }
         
         # Prepare Market Context for Comparison
-        # "AAPL: $150 (+1.2%), TSLA: $200 (-0.5%)"
         market_context_str = ""
         for t in tickers:
             if t == selected_ticker: continue # skip current
@@ -187,6 +202,13 @@ if view_mode == "Deep Dive":
                 c_pct = ((l_t - p_t) / p_t) * 100
                 market_context_str += f"{t}: ${l_t:.2f} ({c_pct:+.2f}%), "
         
+        # Prepare Sentiment Context
+        sentiment_context = None
+        if not all_sentiment.empty:
+            s_rows = all_sentiment[all_sentiment["ticker"] == selected_ticker]
+            if not s_rows.empty:
+                sentiment_context = s_rows.to_dict('records')
+
         # Generate Response
         with st.chat_message("assistant"):
             response = chat_logic.generate_chat_response(
@@ -194,7 +216,8 @@ if view_mode == "Deep Dive":
                 selected_ticker, 
                 df.tail(60) if not df.empty else pd.DataFrame(),
                 prediction=pred_context,
-                market_context=market_context_str
+                market_context=market_context_str,
+                sentiment_context=sentiment_context
             )
             st.markdown(response)
         

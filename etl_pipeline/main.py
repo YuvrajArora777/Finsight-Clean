@@ -111,6 +111,13 @@ def main():
     except Exception as e:
         logging.error(f"LSTM Prediction failed: {e}")
 
+    # Run News Sentiment Analysis
+    try:
+        from . import news_scraper
+        news_scraper.run_sentiment_pipeline(blob_service_client, processed_container)
+    except Exception as e:
+        logging.error(f"Sentiment Analysis failed: {e}")
+
 
 
 if __name__ == "__main__":

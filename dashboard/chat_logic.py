@@ -18,14 +18,31 @@ If you don't know the answer, admit it.
 Do not give financial advice (e.g., 'Buy now!'). Instead say 'The trend is bullish'.
 """
 
-def generate_chat_response(messages, current_ticker, recent_data: pd.DataFrame, prediction=None, market_context=None):
+def calculate_technicals(df: pd.DataFrame):
+    """
+    Simple 'Graph Vision' - calculates support, resistance, and trend.
+    """
+    if df.empty: return "No data available."
+    
+    last_close = df["Close"].iloc[-1]
+    max_price = df["High"].max()
+    min_price = df["Low"].min()
+    
+    # Simple Trend (Price vs 20-day MA)
+    ma_20 = df["Close"].rolling(20).mean().iloc[-1] if len(df) >= 20 else last_close
+    trend = "BULLISH" if last_close > ma_20 else "BEARISH"
+    
+    return f"""
+    - Current Price: ${last_close:.2f}
+    - 60-Day High (Resistance): ${max_price:.2f}
+    - 60-Day Low (Support): ${min_price:.2f}
+    - Technical Trend: {trend} (Price vs 20-MA)
+    """
+
+def generate_chat_response(messages, current_ticker, recent_data: pd.DataFrame, prediction=None, market_context=None, sentiment_context=None):
     """
     Generate a response from OpenAI with context about the current stock.
-    messages: List of {"role": "user", "content": "..."} dicts.
-    current_ticker: "AAPL"
-    recent_data: DataFrame of last 5 days
-    prediction: Optional dict {"price": 123.45, "direction": "UP/DOWN"}
-    market_context: Optional str (summary of other stocks)
+    Enhanced with Sentiment and Technicals.
     """
     client = get_openai_client()
     if not client:
@@ -33,23 +50,26 @@ def generate_chat_response(messages, current_ticker, recent_data: pd.DataFrame, 
 
     # Create Context Block
     context = f"User is currently looking at {current_ticker}.\n"
+    
     if not recent_data.empty:
-        last_close = recent_data.iloc[-1]['Close']
-        prev_close = recent_data.iloc[-2]['Close'] if len(recent_data) > 1 else last_close
-        change = ((last_close - prev_close) / prev_close) * 100
+        # 1. Technical 'Graph Vision'
+        technicals = calculate_technicals(recent_data)
+        context += f"\nTECHNICAL ANALYSIS (Visual Trends):\n{technicals}\n"
         
-        context += f"Latest Data (Last 5 Days):\n{recent_data.tail(5).to_string()}\n"
-        context += f"Current Price: ${last_close:.2f} (Change: {change:.2f}%)\n"
+        # Data Dump (Still useful for specific numbers)
+        context += f"\nLatest Data (Last 5 Days):\n{recent_data.tail(5).to_string()}\n"
     
     if prediction:
-        context += f"AI Prediction for Tomorrow: ${prediction['price']:.2f} ({prediction['direction']})\n"
+        context += f"\nAI PREDICTION (LSTM Model):\nTomorrow's Price: ${prediction['price']:.2f} ({prediction['direction']})\n"
     
+    if sentiment_context:
+        # 2. News/Sentiment Context
+        context += f"\nNEWS SENTIMENT (Latest Headlines):\n"
+        for item in sentiment_context[:3]: # Top 3
+            context += f"- [{item['sentiment_label']}] {item['title']} (Score: {item['sentiment_score']:.2f})\n"
+
     if market_context:
-        context += f"\nMARKET CONTEXT (Use for comparisons):\n{market_context}\n"
-    
-    # Prepend context to the last user message to "inject" it invisibly to the LLM
-    # (Or add as a system message update). 
-    # Here we'll add it as a system instruction for this turn.
+        context += f"\nMARKET CONTEXT (Comparisons):\n{market_context}\n"
     
     full_messages = [{"role": "system", "content": SYSTEM_PROMPT + f"\n\nCONTEXT:\n{context}"}]
     full_messages.extend(messages)
@@ -58,7 +78,7 @@ def generate_chat_response(messages, current_ticker, recent_data: pd.DataFrame, 
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=full_messages,
-            max_tokens=300
+            max_tokens=400
         )
         return response.choices[0].message.content
     except Exception as e:

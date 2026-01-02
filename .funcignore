@@ -1,1 +1,8 @@
 .venv
+.git
+.vscode
+__pycache__
+dashboard/
+test_news.py
+*.md
+local.settings.json
